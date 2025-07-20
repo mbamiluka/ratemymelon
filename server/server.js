@@ -261,19 +261,46 @@ app.get('/api/analytics', async (req, res) => {
   }
 })
 
-// Serve static files
-const staticPath = process.env.NODE_ENV === 'production'
-  ? path.join(__dirname, 'public')  // Docker puts files in ./public
-  : path.join(__dirname, '../dist')  // Local development uses ../dist
+// Serve static files - check which directory exists
+import fs from 'fs'
+
+let staticPath
+let indexPath
+
+// Check if Docker build files exist (./public)
+if (fs.existsSync(path.join(__dirname, 'public'))) {
+  staticPath = path.join(__dirname, 'public')
+  indexPath = path.join(__dirname, 'public/index.html')
+  console.log('Using Docker static files from ./public')
+}
+// Check if local development files exist (../dist)
+else if (fs.existsSync(path.join(__dirname, '../dist'))) {
+  staticPath = path.join(__dirname, '../dist')
+  indexPath = path.join(__dirname, '../dist/index.html')
+  console.log('Using local development files from ../dist')
+}
+// Fallback
+else {
+  staticPath = path.join(__dirname, 'public')
+  indexPath = path.join(__dirname, 'public/index.html')
+  console.log('Using fallback path ./public (files may not exist)')
+}
 
 app.use(express.static(staticPath))
 
 app.get('*', (req, res) => {
-  const indexPath = process.env.NODE_ENV === 'production'
-    ? path.join(__dirname, 'public/index.html')
-    : path.join(__dirname, '../dist/index.html')
-  
-  res.sendFile(indexPath)
+  // Check if index.html exists before trying to serve it
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath)
+  } else {
+    res.status(404).json({
+      error: 'Frontend not found',
+      message: 'Static files not available. Please check deployment configuration.',
+      staticPath,
+      indexPath,
+      NODE_ENV: process.env.NODE_ENV
+    })
+  }
 })
 
 // Error handling middleware
