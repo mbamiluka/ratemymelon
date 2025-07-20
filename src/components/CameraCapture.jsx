@@ -12,6 +12,7 @@ const CameraCapture = ({ onImageCaptured }) => {
   const startCamera = async () => {
     try {
       setError(null)
+      setIsStreaming(false)
       
       // Check if getUserMedia is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -37,25 +38,17 @@ const CameraCapture = ({ onImageCaptured }) => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         
-        // Wait for video to load and start playing
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded, attempting to play')
-          videoRef.current.play().then(() => {
-            console.log('Video playing successfully')
-            setIsStreaming(true)
-          }).catch((playError) => {
-            console.error('Video play error:', playError)
-            setError('Unable to start video preview. Please try again.')
-          })
-        }
+        // Set streaming immediately after getting the stream
+        setIsStreaming(true)
         
-        // Fallback: Set streaming to true after a short delay if metadata doesn't load
-        setTimeout(() => {
-          if (!isStreaming && stream.active) {
-            console.log('Fallback: Setting streaming to true')
-            setIsStreaming(true)
-          }
-        }, 2000)
+        // Try to play the video
+        try {
+          await videoRef.current.play()
+          console.log('Video playing successfully')
+        } catch (playError) {
+          console.error('Video play error:', playError)
+          // Don't set error here, the video might still work without explicit play
+        }
       }
     } catch (err) {
       console.error('Camera access error:', err)
@@ -74,6 +67,7 @@ const CameraCapture = ({ onImageCaptured }) => {
       }
       
       setError(errorMessage)
+      setIsStreaming(false)
     }
   }
 
@@ -114,12 +108,15 @@ const CameraCapture = ({ onImageCaptured }) => {
   }
 
   useEffect(() => {
-    if (facingMode) {
-      startCamera()
-    }
-    
     return () => {
       stopCamera()
+    }
+  }, [])
+
+  // Handle camera switching
+  useEffect(() => {
+    if (isStreaming) {
+      startCamera()
     }
   }, [facingMode])
 
@@ -209,15 +206,22 @@ const CameraCapture = ({ onImageCaptured }) => {
               playsInline
               muted
               controls={false}
+              webkit-playsinline="true"
               className="w-full max-h-96 object-cover"
               style={{
                 transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
-                minHeight: '200px',
-                backgroundColor: '#000'
+                minHeight: '300px',
+                maxHeight: '400px',
+                backgroundColor: '#000',
+                width: '100%',
+                display: 'block'
               }}
-              onLoadedMetadata={() => console.log('Video metadata loaded')}
+              onLoadedMetadata={(e) => {
+                console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
+              }}
               onPlay={() => console.log('Video started playing')}
               onError={(e) => console.error('Video error:', e)}
+              onCanPlay={() => console.log('Video can play')}
             />
             
             {/* Camera overlay guide */}
