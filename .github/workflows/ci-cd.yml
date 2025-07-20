@@ -1,0 +1,179 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install frontend dependencies
+      run: npm ci
+    
+    - name: Install backend dependencies
+      run: |
+        cd server
+        npm ci
+    
+    - name: Run frontend linting
+      run: npm run lint
+      continue-on-error: true
+    
+    - name: Run frontend tests
+      run: npm test -- --coverage --watchAll=false
+      env:
+        CI: true
+    
+    - name: Run backend tests
+      run: |
+        cd server
+        npm test
+      env:
+        NODE_ENV: test
+    
+    - name: Build frontend
+      run: npm run build
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+        fail_ci_if_error: false
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security audit (frontend)
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+    
+    - name: Run security audit (backend)
+      run: |
+        cd server
+        npm ci
+        npm audit --audit-level=moderate
+      continue-on-error: true
+    
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  build-and-deploy:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        cp -r dist deploy/
+        cp -r server deploy/
+        cp package*.json deploy/
+        cp render.yaml deploy/
+        cd deploy
+        tar -czf ../ratemymelon-deploy.tar.gz .
+    
+    - name: Upload deployment artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-package
+        path: ratemymelon-deploy.tar.gz
+        retention-days: 30
+    
+    # Uncomment and configure when ready for automatic deployment
+    # - name: Deploy to Render
+    #   uses: render-deploy/github-action@v1.0.0
+    #   with:
+    #     service-id: ${{ secrets.RENDER_SERVICE_ID }}
+    #     api-key: ${{ secrets.RENDER_API_KEY }}
+
+  lighthouse:
+    needs: [build-and-deploy]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Wait for deployment
+      run: sleep 60
+    
+    - name: Run Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        urls: |
+          https://ratemymelon.onrender.com
+        configPath: './lighthouserc.json'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+      continue-on-error: true
+
+  notify:
+    needs: [test, security, build-and-deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify on success
+      if: ${{ needs.test.result == 'success' && needs.security.result == 'success' && needs.build-and-deploy.result == 'success' }}
+      run: |
+        echo "✅ All checks passed! Deployment successful."
+    
+    - name: Notify on failure
+      if: ${{ needs.test.result == 'failure' || needs.security.result == 'failure' || needs.build-and-deploy.result == 'failure' }}
+      run: |
+        echo "❌ Pipeline failed. Check the logs for details."
+        exit 1

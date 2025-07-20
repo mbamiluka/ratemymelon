@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongodb:
+    image: mongo:7.0
+    container_name: ratemymelon-db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password123}
+      MONGO_INITDB_DATABASE: ratemymelon
+      MONGO_INITDB_USER: ${MONGO_INITDB_USER:-ratemymelon_user}
+      MONGO_INITDB_PASSWORD: ${MONGO_INITDB_PASSWORD:-ratemymelon_password}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - ratemymelon-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7.2-alpine
+    container_name: ratemymelon-cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ratemymelon-network
+
+  # RateMyMelon application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ratemymelon-app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/ratemymelon?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-key}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - ratemymelon-network
+    volumes:
+      - ./logs:/app/logs
+
+  # Nginx reverse proxy (optional, for production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: ratemymelon-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - ratemymelon-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ratemymelon-network:
+    driver: bridge

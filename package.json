@@ -1,0 +1,36 @@
+{
+  "name": "ratemymelon",
+  "version": "1.0.0",
+  "description": "RateMyMelon - AI-powered watermelon quality analysis app",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "server:dev": "cd server && npm run dev",
+    "server:install": "cd server && npm install",
+    "postinstall": "npm run server:install"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@tensorflow/tfjs": "^4.10.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.10.0",
+    "opencv.js": "^1.2.1",
+    "lucide-react": "^0.263.1",
+    "clsx": "^2.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "vite": "^4.4.5",
+    "vite-plugin-pwa": "^0.16.4"
+  }
+}
