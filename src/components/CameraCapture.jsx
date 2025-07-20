@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { Camera, Square, RotateCcw, X } from 'lucide-react'
+import { Camera, Square, RotateCcw, X, Upload } from 'lucide-react'
 
 const CameraCapture = ({ onImageCaptured }) => {
   const videoRef = useRef(null)
@@ -11,6 +11,17 @@ const CameraCapture = ({ onImageCaptured }) => {
   const startCamera = async () => {
     try {
       setError(null)
+      
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera API not supported in this browser')
+      }
+
+      // Check if we're on HTTPS (required for camera access)
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        throw new Error('Camera access requires HTTPS connection')
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
@@ -25,7 +36,21 @@ const CameraCapture = ({ onImageCaptured }) => {
       }
     } catch (err) {
       console.error('Camera access error:', err)
-      setError('Unable to access camera. Please check permissions.')
+      let errorMessage = 'Unable to access camera.'
+      
+      if (err.name === 'NotAllowedError') {
+        errorMessage = 'Camera access denied. Please allow camera permissions and try again.'
+      } else if (err.name === 'NotFoundError') {
+        errorMessage = 'No camera found on this device.'
+      } else if (err.name === 'NotSupportedError') {
+        errorMessage = 'Camera not supported in this browser.'
+      } else if (err.message.includes('HTTPS')) {
+        errorMessage = 'Camera access requires a secure (HTTPS) connection.'
+      } else if (err.message.includes('not supported')) {
+        errorMessage = 'Camera API not supported in this browser. Please use a modern browser.'
+      }
+      
+      setError(errorMessage)
     }
   }
 
@@ -75,6 +100,21 @@ const CameraCapture = ({ onImageCaptured }) => {
     }
   }, [facingMode])
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0]
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        onImageCaptured(e.target.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click()
+  }
+
   if (error) {
     return (
       <div className="text-center py-8">
@@ -83,9 +123,23 @@ const CameraCapture = ({ onImageCaptured }) => {
         </div>
         <h3 className="text-lg font-semibold text-gray-800 mb-2">Camera Error</h3>
         <p className="text-red-600 mb-4">{error}</p>
-        <button className="btn btn-primary" onClick={startCamera}>
-          Try Again
-        </button>
+        <div className="space-y-3">
+          <button className="btn btn-primary" onClick={startCamera}>
+            Try Again
+          </button>
+          <div className="text-gray-500">or</div>
+          <button className="btn btn-secondary" onClick={triggerFileUpload}>
+            <Upload className="w-4 h-4" />
+            Upload Photo Instead
+          </button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
       </div>
     )
   }
@@ -103,10 +157,24 @@ const CameraCapture = ({ onImageCaptured }) => {
           <p className="text-gray-600 mb-4">
             Allow camera access to take a photo of your watermelon
           </p>
-          <button className="btn btn-primary" onClick={startCamera}>
-            <Camera className="w-4 h-4" />
-            Start Camera
-          </button>
+          <div className="space-y-3">
+            <button className="btn btn-primary" onClick={startCamera}>
+              <Camera className="w-4 h-4" />
+              Start Camera
+            </button>
+            <div className="text-gray-500">or</div>
+            <button className="btn btn-secondary" onClick={triggerFileUpload}>
+              <Upload className="w-4 h-4" />
+              Upload Photo
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
         </div>
       ) : (
         <div className="space-y-4">

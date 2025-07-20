@@ -94,7 +94,7 @@ function App() {
         {/* Header */}
         <header className="text-center py-8">
           <h1 className="text-4xl font-bold text-white mb-2">
-            🍉 Watermelon Rater
+            🍉 Rate My Melon
           </h1>
           <p className="text-green-100 text-lg">
             AI-powered watermelon quality assessment
