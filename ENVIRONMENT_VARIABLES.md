@@ -82,7 +82,7 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ratemymelon?retr
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+#GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
 JWT_SECRET=your-super-secret-jwt-key-here
 CORS_ORIGIN=http://localhost:5173,http://localhost:3000
 ```
