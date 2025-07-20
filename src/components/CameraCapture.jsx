@@ -9,14 +9,25 @@ const CameraCapture = ({ onImageCaptured }) => {
   const [error, setError] = useState(null)
   const [facingMode, setFacingMode] = useState('environment')
   const [debugInfo, setDebugInfo] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
+
+  console.log('🔄 CameraCapture component rendered/re-rendered')
 
   const startCamera = async () => {
     try {
+      console.log('🎥 Starting camera...')
+      console.log('🔍 DEBUG: Component mounted:', isMounted)
+      console.log('🔍 DEBUG: videoRef exists at start:', !!videoRef.current)
+      
+      if (!isMounted) {
+        console.warn('⚠️ Component not mounted, aborting camera start')
+        return
+      }
+      
       setError(null)
       setIsStreaming(false)
       setDebugInfo('Starting camera...')
       
-      console.log('🎥 Starting camera...')
       console.log('🌐 Protocol:', location.protocol)
       console.log('🏠 Hostname:', location.hostname)
       
@@ -46,6 +57,14 @@ const CameraCapture = ({ onImageCaptured }) => {
       console.log('📹 Video tracks:', stream.getVideoTracks())
       console.log('🔴 Stream active:', stream.active)
       console.log('🎬 Video element exists:', !!videoRef.current)
+      console.log('🔍 DEBUG: videoRef.current type:', typeof videoRef.current)
+      console.log('🔍 DEBUG: videoRef.current value:', videoRef.current)
+      console.log('🔍 DEBUG: Component still mounted before video access:', isMounted)
+      
+      if (!isMounted) {
+        console.warn('⚠️ Component unmounted during camera setup, aborting')
+        return
+      }
       
       if (videoRef.current) {
         console.log('🔗 Assigning stream to video element...')
@@ -90,7 +109,11 @@ const CameraCapture = ({ onImageCaptured }) => {
         }
       } else {
         console.error('❌ Video element not found!')
+        console.error('🔍 DEBUG: videoRef at error time:', videoRef)
+        console.error('🔍 DEBUG: videoRef.current at error time:', videoRef.current)
+        console.error('🔍 DEBUG: DOM video elements:', document.querySelectorAll('video'))
         setDebugInfo('ERROR: Video element not found!')
+        setError('Video element not found. This may be a timing issue.')
       }
     } catch (err) {
       console.error('❌ Camera access error:', err)
@@ -153,7 +176,11 @@ const CameraCapture = ({ onImageCaptured }) => {
   }
 
   useEffect(() => {
+    console.log('🔧 CameraCapture component mounted')
+    setIsMounted(true)
     return () => {
+      console.log('🔧 CameraCapture component unmounting')
+      setIsMounted(false)
       stopCamera()
     }
   }, [])
