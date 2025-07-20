@@ -26,8 +26,8 @@ git push -u origin main
 4. Configure the service:
    - **Name**: `ratemymelon`
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm run server:dev`
+   - **Build Command**: `npm install && cd server && npm install && cd .. && npm run build`
+   - **Start Command**: `cd server && npm start`
    - **Instance Type**: `Free` (or `Starter` for better performance)
 
 ### Step 3: Set Environment Variables in Render
