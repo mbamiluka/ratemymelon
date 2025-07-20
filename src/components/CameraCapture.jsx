@@ -4,6 +4,7 @@ import { Camera, Square, RotateCcw, X, Upload } from 'lucide-react'
 const CameraCapture = ({ onImageCaptured }) => {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
+  const fileInputRef = useRef(null)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState(null)
   const [facingMode, setFacingMode] = useState('environment') // 'user' for front, 'environment' for back
