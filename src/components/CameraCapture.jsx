@@ -31,9 +31,31 @@ const CameraCapture = ({ onImageCaptured }) => {
         }
       })
       
+      console.log('Camera stream obtained:', stream)
+      console.log('Video tracks:', stream.getVideoTracks())
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        setIsStreaming(true)
+        
+        // Wait for video to load and start playing
+        videoRef.current.onloadedmetadata = () => {
+          console.log('Video metadata loaded, attempting to play')
+          videoRef.current.play().then(() => {
+            console.log('Video playing successfully')
+            setIsStreaming(true)
+          }).catch((playError) => {
+            console.error('Video play error:', playError)
+            setError('Unable to start video preview. Please try again.')
+          })
+        }
+        
+        // Fallback: Set streaming to true after a short delay if metadata doesn't load
+        setTimeout(() => {
+          if (!isStreaming && stream.active) {
+            console.log('Fallback: Setting streaming to true')
+            setIsStreaming(true)
+          }
+        }, 2000)
       }
     } catch (err) {
       console.error('Camera access error:', err)
@@ -186,7 +208,16 @@ const CameraCapture = ({ onImageCaptured }) => {
               autoPlay
               playsInline
               muted
+              controls={false}
               className="w-full max-h-96 object-cover"
+              style={{
+                transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+                minHeight: '200px',
+                backgroundColor: '#000'
+              }}
+              onLoadedMetadata={() => console.log('Video metadata loaded')}
+              onPlay={() => console.log('Video started playing')}
+              onError={(e) => console.error('Video error:', e)}
             />
             
             {/* Camera overlay guide */}
