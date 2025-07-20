@@ -261,14 +261,20 @@ app.get('/api/analytics', async (req, res) => {
   }
 })
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')))
+// Serve static files
+const staticPath = process.env.NODE_ENV === 'production'
+  ? path.join(__dirname, 'public')  // Docker puts files in ./public
+  : path.join(__dirname, '../dist')  // Local development uses ../dist
+
+app.use(express.static(staticPath))
+
+app.get('*', (req, res) => {
+  const indexPath = process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'public/index.html')
+    : path.join(__dirname, '../dist/index.html')
   
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'))
-  })
-}
+  res.sendFile(indexPath)
+})
 
 // Error handling middleware
 app.use((error, req, res, next) => {
