@@ -7,12 +7,18 @@ const CameraCapture = ({ onImageCaptured }) => {
   const fileInputRef = useRef(null)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState(null)
-  const [facingMode, setFacingMode] = useState('environment') // 'user' for front, 'environment' for back
+  const [facingMode, setFacingMode] = useState('environment')
+  const [debugInfo, setDebugInfo] = useState('')
 
   const startCamera = async () => {
     try {
       setError(null)
       setIsStreaming(false)
+      setDebugInfo('Starting camera...')
+      
+      console.log('🎥 Starting camera...')
+      console.log('🌐 Protocol:', location.protocol)
+      console.log('🏠 Hostname:', location.hostname)
       
       // Check if getUserMedia is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -24,6 +30,9 @@ const CameraCapture = ({ onImageCaptured }) => {
         throw new Error('Camera access requires HTTPS connection')
       }
 
+      setDebugInfo('Requesting camera permission...')
+      console.log('📱 Requesting camera with facingMode:', facingMode)
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
@@ -32,26 +41,61 @@ const CameraCapture = ({ onImageCaptured }) => {
         }
       })
       
-      console.log('Camera stream obtained:', stream)
-      console.log('Video tracks:', stream.getVideoTracks())
+      setDebugInfo('Camera stream obtained, setting up video...')
+      console.log('✅ Camera stream obtained:', stream)
+      console.log('📹 Video tracks:', stream.getVideoTracks())
+      console.log('🔴 Stream active:', stream.active)
+      console.log('🎬 Video element exists:', !!videoRef.current)
       
       if (videoRef.current) {
+        console.log('🔗 Assigning stream to video element...')
         videoRef.current.srcObject = stream
         
-        // Set streaming immediately after getting the stream
-        setIsStreaming(true)
+        console.log('📺 Video element srcObject set:', !!videoRef.current.srcObject)
+        
+        // Wait a moment for the stream to be ready
+        setTimeout(() => {
+          console.log('🎯 Setting isStreaming to true...')
+          setIsStreaming(true)
+          setDebugInfo('Video stream active!')
+        }, 500)
+        
+        // Add event listeners for debugging
+        videoRef.current.onloadstart = () => {
+          console.log('🎬 Video loadstart')
+          setDebugInfo('Video loading started...')
+        }
+        videoRef.current.onloadeddata = () => {
+          console.log('📊 Video loadeddata')
+          setDebugInfo('Video data loaded!')
+        }
+        videoRef.current.oncanplay = () => {
+          console.log('▶️ Video canplay')
+          setDebugInfo('Video ready to play!')
+        }
+        videoRef.current.onplaying = () => {
+          console.log('🎥 Video playing')
+          setDebugInfo('Video is playing!')
+        }
         
         // Try to play the video
         try {
+          console.log('▶️ Attempting to play video...')
           await videoRef.current.play()
-          console.log('Video playing successfully')
+          console.log('✅ Video playing successfully')
+          setDebugInfo('Video playing successfully!')
         } catch (playError) {
-          console.error('Video play error:', playError)
-          // Don't set error here, the video might still work without explicit play
+          console.error('❌ Video play error:', playError)
+          setDebugInfo(`Play error: ${playError.message}`)
         }
+      } else {
+        console.error('❌ Video element not found!')
+        setDebugInfo('ERROR: Video element not found!')
       }
     } catch (err) {
-      console.error('Camera access error:', err)
+      console.error('❌ Camera access error:', err)
+      setDebugInfo(`Camera error: ${err.message}`)
+      
       let errorMessage = 'Unable to access camera.'
       
       if (err.name === 'NotAllowedError') {
@@ -77,6 +121,7 @@ const CameraCapture = ({ onImageCaptured }) => {
       tracks.forEach(track => track.stop())
       videoRef.current.srcObject = null
       setIsStreaming(false)
+      setDebugInfo('Camera stopped')
     }
   }
 
@@ -160,6 +205,11 @@ const CameraCapture = ({ onImageCaptured }) => {
           onChange={handleFileUpload}
           className="hidden"
         />
+        {debugInfo && (
+          <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-600">
+            Debug: {debugInfo}
+          </div>
+        )}
       </div>
     )
   }
@@ -195,11 +245,23 @@ const CameraCapture = ({ onImageCaptured }) => {
             onChange={handleFileUpload}
             className="hidden"
           />
+          {debugInfo && (
+            <div className="mt-4 p-2 bg-blue-100 rounded text-xs text-blue-600">
+              Debug: {debugInfo}
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Debug Info */}
+          {debugInfo && (
+            <div className="p-2 bg-green-100 rounded text-xs text-green-600">
+              Debug: {debugInfo}
+            </div>
+          )}
+          
           {/* Video Preview */}
-          <div className="relative bg-black rounded-lg overflow-hidden">
+          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500">
             <video
               ref={videoRef}
               autoPlay
@@ -207,21 +269,32 @@ const CameraCapture = ({ onImageCaptured }) => {
               muted
               controls={false}
               webkit-playsinline="true"
-              className="w-full max-h-96 object-cover"
+              className="w-full"
               style={{
                 transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
                 minHeight: '300px',
                 maxHeight: '400px',
                 backgroundColor: '#000',
                 width: '100%',
-                display: 'block'
+                display: 'block',
+                objectFit: 'cover'
               }}
               onLoadedMetadata={(e) => {
                 console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
+                setDebugInfo(`Video: ${e.target.videoWidth}x${e.target.videoHeight}`)
               }}
-              onPlay={() => console.log('Video started playing')}
-              onError={(e) => console.error('Video error:', e)}
-              onCanPlay={() => console.log('Video can play')}
+              onPlay={() => {
+                console.log('Video started playing')
+                setDebugInfo('Video is playing!')
+              }}
+              onError={(e) => {
+                console.error('Video error:', e)
+                setDebugInfo(`Video error: ${e.type}`)
+              }}
+              onCanPlay={() => {
+                console.log('Video can play')
+                setDebugInfo('Video ready!')
+              }}
             />
             
             {/* Camera overlay guide */}
