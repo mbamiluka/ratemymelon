@@ -241,9 +241,9 @@ const CameraCapture = ({ onImageCaptured }) => {
           backgroundColor: '#000',
           display: isStreaming ? 'block' : 'none',
           objectFit: 'contain',
-          maxWidth: '95%',
+          maxWidth: '100%',
           maxHeight: '500px',
-          width: '95%',
+          width: 'auto',
           height: 'auto'
         }}
         onLoadedMetadata={(e) => {
@@ -307,17 +307,17 @@ const CameraCapture = ({ onImageCaptured }) => {
             {/* Video is rendered above with image-preview class */}
           </div>
 
-          {/* Camera Controls - Very compact */}
-          <div className="flex gap-2 justify-center mt-2">
+          {/* Camera Controls - With padding */}
+          <div className="flex gap-3 justify-center mt-3">
             <button
-              className="bg-green-500 text-white px-3 py-2 rounded text-sm"
+              className="bg-green-500 text-white px-4 py-3 rounded text-sm"
               onClick={capturePhoto}
             >
               Capture
             </button>
             
             <button
-              className="bg-gray-500 text-white px-3 py-2 rounded text-sm"
+              className="bg-gray-500 text-white px-4 py-3 rounded text-sm"
               onClick={stopCamera}
             >
               ❌ Cancel
@@ -327,12 +327,6 @@ const CameraCapture = ({ onImageCaptured }) => {
           {/* Hidden canvas for image capture */}
           <canvas ref={canvasRef} className="hidden" />
           
-          {/* Debug Info - Compact */}
-          {debugInfo && (
-            <div className="mt-2 p-1 bg-gray-100 rounded text-xs text-gray-500 text-center">
-              {debugInfo}
-            </div>
-          )}
         </div>
       )}
       
