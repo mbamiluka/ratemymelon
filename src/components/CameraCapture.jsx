@@ -241,9 +241,9 @@ const CameraCapture = ({ onImageCaptured }) => {
           backgroundColor: '#000',
           display: isStreaming ? 'block' : 'none',
           objectFit: 'contain',
-          maxWidth: '100%',
-          maxHeight: '420px',
-          width: 'auto',
+          maxWidth: '95%',
+          maxHeight: '500px',
+          width: '95%',
           height: 'auto'
         }}
         onLoadedMetadata={(e) => {
@@ -313,7 +313,7 @@ const CameraCapture = ({ onImageCaptured }) => {
               className="bg-green-500 text-white px-3 py-2 rounded text-sm"
               onClick={capturePhoto}
             >
-              📷 Capture
+              Capture
             </button>
             
             <button
@@ -337,7 +337,7 @@ const CameraCapture = ({ onImageCaptured }) => {
       )}
       
       <div className="mt-3 text-xs text-gray-400 text-center">
-        <p>💡 Hold steady • Good lighting • Frame entire watermelon</p>
+        <p>Hold steady • Good lighting • Frame entire watermelon</p>
       </div>
     </div>
   )
