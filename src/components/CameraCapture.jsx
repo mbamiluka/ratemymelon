@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { Camera, Square, RotateCcw, X, Upload } from 'lucide-react'
+import { Camera, Square, X, Upload } from 'lucide-react'
 
 const CameraCapture = ({ onImageCaptured }) => {
   const videoRef = useRef(null)
@@ -7,7 +7,6 @@ const CameraCapture = ({ onImageCaptured }) => {
   const fileInputRef = useRef(null)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState(null)
-  const [facingMode, setFacingMode] = useState('environment')
   const [debugInfo, setDebugInfo] = useState('')
   const [isMounted, setIsMounted] = useState(false)
 
@@ -40,11 +39,11 @@ const CameraCapture = ({ onImageCaptured }) => {
       }
 
       setDebugInfo('Requesting camera permission...')
-      console.log('📱 Requesting camera with facingMode:', facingMode)
+      console.log('📱 Requesting camera with rear camera (environment)')
       
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: facingMode,
+          facingMode: 'environment',
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -164,10 +163,6 @@ const CameraCapture = ({ onImageCaptured }) => {
     stopCamera()
   }
 
-  const switchCamera = () => {
-    stopCamera()
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user')
-  }
 
   useEffect(() => {
     console.log('🔧 CameraCapture component mounted')
@@ -179,12 +174,6 @@ const CameraCapture = ({ onImageCaptured }) => {
     }
   }, [])
 
-  // Handle camera switching
-  useEffect(() => {
-    if (isStreaming) {
-      startCamera()
-    }
-  }, [facingMode])
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0]
@@ -247,13 +236,9 @@ const CameraCapture = ({ onImageCaptured }) => {
         muted
         controls={false}
         webkit-playsinline="true"
-        className={isStreaming ? "w-full" : "hidden"}
+        className={isStreaming ? "w-full h-full absolute inset-0" : "hidden"}
         style={{
-          transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
-          minHeight: '300px',
-          maxHeight: '400px',
           backgroundColor: '#000',
-          width: '100%',
           display: isStreaming ? 'block' : 'none',
           objectFit: 'cover'
         }}
@@ -312,22 +297,22 @@ const CameraCapture = ({ onImageCaptured }) => {
           
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col h-screen max-h-screen">
           {/* Debug Info */}
           {debugInfo && (
-            <div className="p-2 bg-green-100 rounded text-xs text-green-600">
+            <div className="p-2 bg-green-100 rounded text-xs text-green-600 mb-2">
               Debug: {debugInfo}
             </div>
           )}
           
-          {/* Video Preview Container */}
-          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500">
+          {/* Video Preview Container - Takes available space */}
+          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500 flex-1 min-h-0">
             {/* Video is rendered above but positioned here visually */}
-            <div className="w-full" style={{ minHeight: '300px', maxHeight: '400px' }}>
+            <div className="w-full h-full">
               {/* Camera overlay guide */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="border-2 border-white border-dashed rounded-lg w-64 h-48 flex items-center justify-center">
-                  <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                <div className="border-2 border-white border-dashed rounded-lg w-48 h-36 sm:w-64 sm:h-48 flex items-center justify-center">
+                  <span className="text-white text-xs sm:text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
                     Center watermelon here
                   </span>
                 </div>
@@ -335,31 +320,22 @@ const CameraCapture = ({ onImageCaptured }) => {
             </div>
           </div>
 
-          {/* Camera Controls */}
-          <div className="flex gap-4 justify-center">
+          {/* Camera Controls - Always visible at bottom */}
+          <div className="flex gap-4 justify-center mt-4 pb-4">
             <button
-              className="btn btn-secondary"
-              onClick={switchCamera}
-              title="Switch Camera"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Flip
-            </button>
-            
-            <button
-              className="btn btn-primary"
+              className="btn btn-primary text-sm px-6 py-3"
               onClick={capturePhoto}
             >
-              <Square className="w-4 h-4" />
-              Capture Photo
+              <Square className="w-5 h-5" />
+              <span className="ml-2">Capture Photo</span>
             </button>
             
             <button
-              className="btn btn-secondary"
+              className="btn btn-secondary text-sm px-4 py-3"
               onClick={stopCamera}
             >
-              <X className="w-4 h-4" />
-              Cancel
+              <X className="w-5 h-5" />
+              <span className="ml-2">Cancel</span>
             </button>
           </div>
 
