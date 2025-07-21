@@ -242,7 +242,7 @@ const CameraCapture = ({ onImageCaptured }) => {
           display: isStreaming ? 'block' : 'none',
           objectFit: 'contain',
           maxWidth: '100%',
-          maxHeight: '300px',
+          maxHeight: '350px',
           width: 'auto',
           height: 'auto'
         }}
