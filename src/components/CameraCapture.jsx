@@ -297,22 +297,23 @@ const CameraCapture = ({ onImageCaptured }) => {
           
         </div>
       ) : (
-        <div className="flex flex-col h-screen max-h-screen">
+        <div className="flex flex-col h-full max-h-screen">
           {/* Debug Info */}
           {debugInfo && (
-            <div className="p-2 bg-green-100 rounded text-xs text-green-600 mb-2">
+            <div className="p-2 bg-green-100 rounded text-xs text-green-600 mb-2 flex-shrink-0">
               Debug: {debugInfo}
             </div>
           )}
           
-          {/* Video Preview Container - Takes available space */}
-          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500 flex-1 min-h-0">
+          {/* Video Preview Container - Fixed height to leave room for controls */}
+          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500"
+               style={{ height: 'calc(100vh - 120px)' }}>
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="border-2 border-white border-dashed rounded-lg w-48 h-36 sm:w-64 sm:h-48 flex items-center justify-center">
-                  <span className="text-white text-xs sm:text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                <div className="border-2 border-white border-dashed rounded-lg w-40 h-32 sm:w-48 sm:h-36 flex items-center justify-center">
+                  <span className="text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
                     Center watermelon here
                   </span>
                 </div>
@@ -320,22 +321,22 @@ const CameraCapture = ({ onImageCaptured }) => {
             </div>
           </div>
 
-          {/* Camera Controls - Always visible at bottom */}
-          <div className="flex gap-4 justify-center mt-4 pb-4">
+          {/* Camera Controls - Fixed at bottom, always visible */}
+          <div className="flex gap-3 justify-center mt-3 pb-safe flex-shrink-0">
             <button
-              className="btn btn-primary text-sm px-6 py-3"
+              className="btn btn-primary text-sm px-5 py-2.5 flex-1 max-w-40"
               onClick={capturePhoto}
             >
-              <Square className="w-5 h-5" />
-              <span className="ml-2">Capture Photo</span>
+              <Square className="w-4 h-4" />
+              <span className="ml-1">Capture</span>
             </button>
             
             <button
-              className="btn btn-secondary text-sm px-4 py-3"
+              className="btn btn-secondary text-sm px-4 py-2.5"
               onClick={stopCamera}
             >
-              <X className="w-5 h-5" />
-              <span className="ml-2">Cancel</span>
+              <X className="w-4 h-4" />
+              <span className="ml-1">Cancel</span>
             </button>
           </div>
 
