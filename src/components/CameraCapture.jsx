@@ -236,18 +236,11 @@ const CameraCapture = ({ onImageCaptured }) => {
         muted
         controls={false}
         webkit-playsinline="true"
-        className={isStreaming ? "" : "hidden"}
+        className={isStreaming ? "image-preview mx-auto" : "hidden"}
         style={{
           backgroundColor: '#000',
           display: isStreaming ? 'block' : 'none',
-          objectFit: 'cover',
-          width: '100%',
-          height: '200px',
-          maxWidth: '100%',
-          maxHeight: '200px',
-          position: 'absolute',
-          top: 0,
-          left: 0
+          objectFit: 'contain'
         }}
         onLoadedMetadata={(e) => {
           console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
@@ -305,11 +298,11 @@ const CameraCapture = ({ onImageCaptured }) => {
         </div>
       ) : (
         <div>
-          {/* Video Preview Container - Optimized for mobile card */}
-          <div className="relative bg-black rounded border w-full" style={{ height: '200px', overflow: 'hidden', maxWidth: '100%' }}>
-            {/* Video is rendered above but positioned here visually */}
-            <div className="w-full h-full">
-              {/* Camera overlay guide */}
+          {/* Video Preview - Matches captured image styling exactly */}
+          <div className="text-center mb-6">
+            {/* Video is rendered above with image-preview class */}
+            {/* Camera overlay guide */}
+            <div className="relative inline-block">
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 <div className="border border-white border-dashed rounded w-24 h-16 flex items-center justify-center">
                   <span className="text-white text-xs bg-black bg-opacity-50 px-1 py-1 rounded">
