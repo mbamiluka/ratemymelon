@@ -16,11 +16,6 @@ const CameraCapture = ({ onImageCaptured }) => {
   const startCamera = async () => {
     try {
       console.log('🎥 Starting camera...')
-      console.log('🔍 DEBUG: Component mounted:', isMounted)
-      console.log('🔍 DEBUG: isStreaming state:', isStreaming)
-      console.log('🔍 DEBUG: videoRef exists at start:', !!videoRef.current)
-      console.log('🔍 DEBUG: DOM video elements count:', document.querySelectorAll('video').length)
-      console.log('🔍 DEBUG: All DOM elements with video tag:', Array.from(document.querySelectorAll('video')).map(v => v.outerHTML.substring(0, 100)))
       
       if (!isMounted) {
         console.warn('⚠️ Component not mounted, aborting camera start')
@@ -112,15 +107,7 @@ const CameraCapture = ({ onImageCaptured }) => {
         }
       } else {
         console.error('❌ Video element not found!')
-        console.error('🔍 DEBUG: videoRef at error time:', videoRef)
-        console.error('🔍 DEBUG: videoRef.current at error time:', videoRef.current)
-        console.error('🔍 DEBUG: isStreaming at error time:', isStreaming)
-        console.error('🔍 DEBUG: isMounted at error time:', isMounted)
-        console.error('🔍 DEBUG: DOM video elements:', document.querySelectorAll('video'))
-        console.error('🔍 DEBUG: Component render state - should video be visible?', isStreaming)
-        console.error('🔍 DEBUG: React component tree:', document.querySelector('.text-center')?.innerHTML?.substring(0, 200))
-        setDebugInfo('ERROR: Video element not found! Check console for details.')
-        setError('Video element not found. This appears to be a timing issue where the video element is not yet rendered in the DOM.')
+        setError('Video element not found. Please try again.')
       }
     } catch (err) {
       console.error('❌ Camera access error:', err)
@@ -245,22 +232,12 @@ const CameraCapture = ({ onImageCaptured }) => {
           </div>
         )}
         
-        {/* Visible Debug Panel for Error State */}
-        <div className="mt-4 p-3 bg-red-50 rounded text-xs text-red-700 border border-red-200">
-          <div className="font-semibold mb-2">🔍 Debug Info (Error State):</div>
-          <div>Component Mounted: {isMounted ? '✅' : '❌'}</div>
-          <div>Is Streaming: {isStreaming ? '✅' : '❌'}</div>
-          <div>Video Ref Exists: {videoRef.current ? '✅' : '❌'}</div>
-          <div>DOM Video Elements: {typeof document !== 'undefined' ? document.querySelectorAll('video').length : 'N/A'}</div>
-          <div>Error: {error}</div>
-        </div>
       </div>
     )
   }
 
   return (
     <div className="text-center">
-      {console.log('🎬 RENDER: isStreaming =', isStreaming, ', isMounted =', isMounted, ', error =', !!error)}
       
       {/* Always render video element but hide it when not streaming */}
       <video
@@ -333,15 +310,6 @@ const CameraCapture = ({ onImageCaptured }) => {
             </div>
           )}
           
-          {/* Visible Debug Panel */}
-          <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-700 border">
-            <div className="font-semibold mb-2">🔍 Debug Info:</div>
-            <div>Component Mounted: {isMounted ? '✅' : '❌'}</div>
-            <div>Is Streaming: {isStreaming ? '✅' : '❌'}</div>
-            <div>Video Ref Exists: {videoRef.current ? '✅' : '❌'}</div>
-            <div>DOM Video Elements: {typeof document !== 'undefined' ? document.querySelectorAll('video').length : 'N/A'}</div>
-            <div>Error State: {error ? '❌ ' + error : '✅ No Error'}</div>
-          </div>
         </div>
       ) : (
         <div className="space-y-4">
