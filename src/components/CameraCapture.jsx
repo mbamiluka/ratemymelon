@@ -297,7 +297,7 @@ const CameraCapture = ({ onImageCaptured }) => {
           
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Debug Info */}
           {debugInfo && (
             <div className="p-2 bg-green-100 rounded text-xs text-green-600">
@@ -305,37 +305,37 @@ const CameraCapture = ({ onImageCaptured }) => {
             </div>
           )}
           
-          {/* Video Preview Container - Responsive height for mobile */}
-          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500 w-full aspect-[4/3] max-h-[60vh]">
+          {/* Video Preview Container - Fixed mobile-friendly height */}
+          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500 w-full h-64 sm:h-80">
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="border-2 border-white border-dashed rounded-lg w-32 h-24 sm:w-40 sm:h-32 flex items-center justify-center">
-                  <span className="text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
-                    Center watermelon
+                <div className="border-2 border-white border-dashed rounded-lg w-28 h-20 sm:w-36 sm:h-28 flex items-center justify-center">
+                  <span className="text-white text-xs bg-black bg-opacity-50 px-1 py-1 rounded">
+                    Watermelon
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Camera Controls - Always visible below video */}
-          <div className="flex gap-3 justify-center">
+          {/* Camera Controls - Compact mobile layout */}
+          <div className="flex gap-2 justify-center">
             <button
-              className="btn btn-primary text-sm px-6 py-3"
+              className="btn btn-primary text-sm px-4 py-2"
               onClick={capturePhoto}
             >
               <Square className="w-4 h-4" />
-              <span className="ml-2">Capture Photo</span>
+              <span className="ml-1">Capture</span>
             </button>
             
             <button
-              className="btn btn-secondary text-sm px-4 py-3"
+              className="btn btn-secondary text-sm px-3 py-2"
               onClick={stopCamera}
             >
               <X className="w-4 h-4" />
-              <span className="ml-2">Cancel</span>
+              <span className="ml-1">Cancel</span>
             </button>
           </div>
 
