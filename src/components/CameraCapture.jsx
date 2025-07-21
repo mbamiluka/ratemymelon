@@ -242,7 +242,7 @@ const CameraCapture = ({ onImageCaptured }) => {
           display: isStreaming ? 'block' : 'none',
           objectFit: 'contain',
           maxWidth: '100%',
-          maxHeight: '350px',
+          maxHeight: '420px',
           width: 'auto',
           height: 'auto'
         }}
@@ -303,18 +303,8 @@ const CameraCapture = ({ onImageCaptured }) => {
       ) : (
         <div>
           {/* Video Preview - Matches captured image styling exactly */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             {/* Video is rendered above with image-preview class */}
-            {/* Camera overlay guide */}
-            <div className="relative inline-block">
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="border border-white border-dashed rounded w-24 h-16 flex items-center justify-center">
-                  <span className="text-white text-xs bg-black bg-opacity-50 px-1 py-1 rounded">
-                    🍉
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Camera Controls - Very compact */}
