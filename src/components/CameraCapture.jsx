@@ -240,7 +240,11 @@ const CameraCapture = ({ onImageCaptured }) => {
         style={{
           backgroundColor: '#000',
           display: isStreaming ? 'block' : 'none',
-          objectFit: 'contain'
+          objectFit: 'contain',
+          maxWidth: '100%',
+          maxHeight: '300px',
+          width: 'auto',
+          height: 'auto'
         }}
         onLoadedMetadata={(e) => {
           console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
