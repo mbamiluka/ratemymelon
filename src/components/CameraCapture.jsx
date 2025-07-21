@@ -17,7 +17,10 @@ const CameraCapture = ({ onImageCaptured }) => {
     try {
       console.log('🎥 Starting camera...')
       console.log('🔍 DEBUG: Component mounted:', isMounted)
+      console.log('🔍 DEBUG: isStreaming state:', isStreaming)
       console.log('🔍 DEBUG: videoRef exists at start:', !!videoRef.current)
+      console.log('🔍 DEBUG: DOM video elements count:', document.querySelectorAll('video').length)
+      console.log('🔍 DEBUG: All DOM elements with video tag:', Array.from(document.querySelectorAll('video')).map(v => v.outerHTML.substring(0, 100)))
       
       if (!isMounted) {
         console.warn('⚠️ Component not mounted, aborting camera start')
@@ -111,9 +114,13 @@ const CameraCapture = ({ onImageCaptured }) => {
         console.error('❌ Video element not found!')
         console.error('🔍 DEBUG: videoRef at error time:', videoRef)
         console.error('🔍 DEBUG: videoRef.current at error time:', videoRef.current)
+        console.error('🔍 DEBUG: isStreaming at error time:', isStreaming)
+        console.error('🔍 DEBUG: isMounted at error time:', isMounted)
         console.error('🔍 DEBUG: DOM video elements:', document.querySelectorAll('video'))
-        setDebugInfo('ERROR: Video element not found!')
-        setError('Video element not found. This may be a timing issue.')
+        console.error('🔍 DEBUG: Component render state - should video be visible?', isStreaming)
+        console.error('🔍 DEBUG: React component tree:', document.querySelector('.text-center')?.innerHTML?.substring(0, 200))
+        setDebugInfo('ERROR: Video element not found! Check console for details.')
+        setError('Video element not found. This appears to be a timing issue where the video element is not yet rendered in the DOM.')
       }
     } catch (err) {
       console.error('❌ Camera access error:', err)
@@ -243,6 +250,7 @@ const CameraCapture = ({ onImageCaptured }) => {
 
   return (
     <div className="text-center">
+      {console.log('🎬 RENDER: isStreaming =', isStreaming, ', isMounted =', isMounted, ', error =', !!error)}
       {!isStreaming ? (
         <div className="py-8">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
