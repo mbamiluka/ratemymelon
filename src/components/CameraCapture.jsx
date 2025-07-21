@@ -236,11 +236,18 @@ const CameraCapture = ({ onImageCaptured }) => {
         muted
         controls={false}
         webkit-playsinline="true"
-        className={isStreaming ? "w-full h-full absolute inset-0" : "hidden"}
+        className={isStreaming ? "" : "hidden"}
         style={{
           backgroundColor: '#000',
           display: isStreaming ? 'block' : 'none',
-          objectFit: 'cover'
+          objectFit: 'cover',
+          width: '100%',
+          height: '150px',
+          maxWidth: '100%',
+          maxHeight: '150px',
+          position: 'absolute',
+          top: 0,
+          left: 0
         }}
         onLoadedMetadata={(e) => {
           console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
@@ -311,7 +318,7 @@ const CameraCapture = ({ onImageCaptured }) => {
           </div>
           
           {/* Video Preview Container - Very small for mobile */}
-          <div className="relative bg-black rounded overflow-hidden border w-full" style={{ height: '200px' }}>
+          <div className="relative bg-black rounded border w-full" style={{ height: '150px', overflow: 'hidden', maxWidth: '100%' }}>
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
