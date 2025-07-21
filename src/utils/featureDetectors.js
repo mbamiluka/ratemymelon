@@ -61,12 +61,13 @@ export async function analyzeFieldSpotColor(imageData, modelPrediction) {
     const width = imageData.width
     const height = imageData.height
     
-    // Look for field spot in bottom portion of watermelon (expanded search area)
+    // Enhanced search region - field spots can appear in various locations
+    // Search the bottom 60% of the watermelon with some overlap into center
     const searchRegion = {
       x: Math.max(0, contour.boundingBox.x),
-      y: Math.max(0, contour.boundingBox.y + contour.boundingBox.height * 0.5), // Start higher
+      y: Math.max(0, contour.boundingBox.y + contour.boundingBox.height * 0.4), // Start earlier
       width: contour.boundingBox.width,
-      height: Math.min(height, contour.boundingBox.height * 0.5) // Cover more area
+      height: Math.min(height, contour.boundingBox.height * 0.6) // Cover more area
     }
     
     // Use more detailed sampling for field spot detection
@@ -83,36 +84,55 @@ export async function analyzeFieldSpotColor(imageData, modelPrediction) {
       const yellowness = (r + g) / 2 - b
       const brightness = (r + g + b) / 3
       
-      // More comprehensive field spot detection - look for various yellow/cream/tan tones
-      // Include more color variations that could indicate field spots
-      const isYellowish = (r > g && g > b && brightness > 80) || // Traditional yellow
-                         (r > g && r > b && g > b * 1.1 && brightness > 90) || // Cream/tan
-                         (r >= g && g >= b && r > b * 1.2 && brightness > 70) || // Light brown/tan
-                         (Math.abs(r - g) < 30 && r > b * 1.3 && brightness > 85) // Beige/cream
+      // Enhanced field spot detection - much more lenient and comprehensive
+      // Real watermelon field spots can be very subtle and varied
+      const isFieldSpotCandidate =
+        // Traditional yellow/cream (relaxed brightness requirements)
+        (r >= g && g >= b && yellowness > 10 && brightness > 40) ||
+        // Brown/tan field spots (common in ripe watermelons)
+        (r > g && r > b && g > b * 0.8 && brightness > 30 && brightness < 160) ||
+        // Beige/cream field spots (very common)
+        (Math.abs(r - g) < 40 && r > b * 1.1 && brightness > 50 && brightness < 200) ||
+        // Pale yellow field spots (subtle but valid)
+        (r >= g && yellowness > 5 && brightness > 35 && brightness < 180) ||
+        // Grayish-brown field spots (weathered appearance)
+        (Math.abs(r - g) < 20 && Math.abs(g - b) < 20 && r > b && brightness > 60 && brightness < 140) ||
+        // Reddish-brown field spots (sun-exposed)
+        (r > g && r > b && g >= b * 0.9 && brightness > 40 && brightness < 150)
       
-      if (isYellowish) {
+      if (isFieldSpotCandidate) {
         let colorScore = 0
         
-        // Strong yellow (original criteria)
-        if (yellowness > 40 && r > 140 && g > 110 && b < 110) {
-          colorScore = Math.min(100, (yellowness / 80) * 70 + (color.percentage / 15) * 30)
+        // Premium field spot colors (high scores)
+        if (yellowness > 30 && r > 120 && brightness > 80 && brightness < 180) {
+          colorScore = Math.min(90, (yellowness / 60) * 60 + (color.percentage / 10) * 30)
         }
-        // Moderate yellow/cream (expanded criteria)
-        else if (yellowness > 15 && r > 110 && g > 90 && b < 130) {
-          colorScore = Math.min(70, (yellowness / 60) * 45 + (color.percentage / 20) * 25)
+        // Excellent brown/tan field spots
+        else if (r > g && r > b && g > b * 0.9 && brightness > 70 && brightness < 140) {
+          const brownScore = (r - b) / 3 + (r - g) / 6
+          colorScore = Math.min(80, brownScore + (color.percentage / 12) * 25)
         }
-        // Pale yellow/cream (more lenient)
-        else if (yellowness > 5 && r > 85 && g > 75 && b < 140) {
-          colorScore = Math.min(50, (yellowness / 40) * 30 + (color.percentage / 25) * 20)
+        // Good cream/beige field spots
+        else if (yellowness > 15 && brightness > 60 && brightness < 160) {
+          colorScore = Math.min(70, (yellowness / 40) * 40 + (color.percentage / 15) * 30)
         }
-        // Very pale/cream/tan (expanded detection)
-        else if (yellowness > 0 && r > 75 && g > 65 && b < 150 && brightness > 70) {
-          colorScore = Math.min(35, (yellowness / 30) * 20 + (color.percentage / 30) * 15)
+        // Moderate field spots (still valuable)
+        else if (yellowness > 8 && brightness > 50 && brightness < 170) {
+          colorScore = Math.min(60, (yellowness / 30) * 35 + (color.percentage / 20) * 25)
         }
-        // Light tan/beige (new category for very subtle field spots)
-        else if (r >= g && g >= b && r > b * 1.1 && brightness > 60 && brightness < 180) {
-          const tanScore = (r - b) / 4 + (color.percentage / 40) * 10
-          colorScore = Math.min(25, tanScore)
+        // Subtle field spots (common in real watermelons)
+        else if (yellowness > 3 && brightness > 40 && brightness < 180) {
+          colorScore = Math.min(50, (yellowness / 25) * 30 + (color.percentage / 25) * 20)
+        }
+        // Faint but detectable field spots
+        else if (r >= g && r > b && brightness > 35) {
+          const faintScore = (r - b) / 6 + (color.percentage / 30) * 15
+          colorScore = Math.min(40, faintScore)
+        }
+        // Very faint field spots (better than nothing)
+        else if (r > b || yellowness > 0) {
+          const veryFaintScore = Math.max(yellowness / 10, (r - b) / 8) + (color.percentage / 40) * 10
+          colorScore = Math.min(30, veryFaintScore)
         }
         
         if (colorScore > yellowScore) {
@@ -122,8 +142,9 @@ export async function analyzeFieldSpotColor(imageData, modelPrediction) {
       }
     })
     
-    // More conservative final scoring
-    const finalScore = Math.min(100, yellowScore)
+    // Apply 10% reduction as requested, then cap at 100
+    const reducedScore = yellowScore * 0.9
+    const finalScore = Math.min(100, reducedScore)
     
     let description = 'No clear field spot detected'
     if (finalScore > 70) {
