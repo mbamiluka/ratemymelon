@@ -297,46 +297,45 @@ const CameraCapture = ({ onImageCaptured }) => {
           
         </div>
       ) : (
-        <div className="flex flex-col h-full max-h-screen">
+        <div className="space-y-4">
           {/* Debug Info */}
           {debugInfo && (
-            <div className="p-2 bg-green-100 rounded text-xs text-green-600 mb-2 flex-shrink-0">
+            <div className="p-2 bg-green-100 rounded text-xs text-green-600">
               Debug: {debugInfo}
             </div>
           )}
           
-          {/* Video Preview Container - Fixed height to leave room for controls */}
-          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500"
-               style={{ height: 'calc(100vh - 120px)' }}>
+          {/* Video Preview Container - Responsive height for mobile */}
+          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500 w-full aspect-[4/3] max-h-[60vh]">
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="border-2 border-white border-dashed rounded-lg w-40 h-32 sm:w-48 sm:h-36 flex items-center justify-center">
+                <div className="border-2 border-white border-dashed rounded-lg w-32 h-24 sm:w-40 sm:h-32 flex items-center justify-center">
                   <span className="text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
-                    Center watermelon here
+                    Center watermelon
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Camera Controls - Fixed at bottom, always visible */}
-          <div className="flex gap-3 justify-center mt-3 pb-safe flex-shrink-0">
+          {/* Camera Controls - Always visible below video */}
+          <div className="flex gap-3 justify-center">
             <button
-              className="btn btn-primary text-sm px-5 py-2.5 flex-1 max-w-40"
+              className="btn btn-primary text-sm px-6 py-3"
               onClick={capturePhoto}
             >
               <Square className="w-4 h-4" />
-              <span className="ml-1">Capture</span>
+              <span className="ml-2">Capture Photo</span>
             </button>
             
             <button
-              className="btn btn-secondary text-sm px-4 py-2.5"
+              className="btn btn-secondary text-sm px-4 py-3"
               onClick={stopCamera}
             >
               <X className="w-4 h-4" />
-              <span className="ml-1">Cancel</span>
+              <span className="ml-2">Cancel</span>
             </button>
           </div>
 
