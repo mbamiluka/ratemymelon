@@ -297,45 +297,48 @@ const CameraCapture = ({ onImageCaptured }) => {
           
         </div>
       ) : (
-        <div className="space-y-3">
+        <div>
           {/* Debug Info */}
           {debugInfo && (
-            <div className="p-2 bg-green-100 rounded text-xs text-green-600">
+            <div className="p-2 bg-green-100 rounded text-xs text-green-600 mb-2">
               Debug: {debugInfo}
             </div>
           )}
           
-          {/* Video Preview Container - Fixed mobile-friendly height */}
-          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500 w-full h-64 sm:h-80">
+          {/* Temporary Mobile Debug Info */}
+          <div className="p-2 bg-yellow-50 rounded text-xs text-gray-600 mb-2 border">
+            Screen: {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}
+          </div>
+          
+          {/* Video Preview Container - Very small for mobile */}
+          <div className="relative bg-black rounded overflow-hidden border w-full" style={{ height: '200px' }}>
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="border-2 border-white border-dashed rounded-lg w-28 h-20 sm:w-36 sm:h-28 flex items-center justify-center">
+                <div className="border border-white border-dashed rounded w-24 h-16 flex items-center justify-center">
                   <span className="text-white text-xs bg-black bg-opacity-50 px-1 py-1 rounded">
-                    Watermelon
+                    🍉
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Camera Controls - Compact mobile layout */}
-          <div className="flex gap-2 justify-center">
+          {/* Camera Controls - Very compact */}
+          <div className="flex gap-2 justify-center mt-2">
             <button
-              className="btn btn-primary text-sm px-4 py-2"
+              className="bg-green-500 text-white px-3 py-2 rounded text-sm"
               onClick={capturePhoto}
             >
-              <Square className="w-4 h-4" />
-              <span className="ml-1">Capture</span>
+              📷 Capture
             </button>
             
             <button
-              className="btn btn-secondary text-sm px-3 py-2"
+              className="bg-gray-500 text-white px-3 py-2 rounded text-sm"
               onClick={stopCamera}
             >
-              <X className="w-4 h-4" />
-              <span className="ml-1">Cancel</span>
+              ❌ Cancel
             </button>
           </div>
 
