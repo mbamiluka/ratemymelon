@@ -244,6 +244,16 @@ const CameraCapture = ({ onImageCaptured }) => {
             Debug: {debugInfo}
           </div>
         )}
+        
+        {/* Visible Debug Panel for Error State */}
+        <div className="mt-4 p-3 bg-red-50 rounded text-xs text-red-700 border border-red-200">
+          <div className="font-semibold mb-2">🔍 Debug Info (Error State):</div>
+          <div>Component Mounted: {isMounted ? '✅' : '❌'}</div>
+          <div>Is Streaming: {isStreaming ? '✅' : '❌'}</div>
+          <div>Video Ref Exists: {videoRef.current ? '✅' : '❌'}</div>
+          <div>DOM Video Elements: {typeof document !== 'undefined' ? document.querySelectorAll('video').length : 'N/A'}</div>
+          <div>Error: {error}</div>
+        </div>
       </div>
     )
   }
@@ -251,6 +261,43 @@ const CameraCapture = ({ onImageCaptured }) => {
   return (
     <div className="text-center">
       {console.log('🎬 RENDER: isStreaming =', isStreaming, ', isMounted =', isMounted, ', error =', !!error)}
+      
+      {/* Always render video element but hide it when not streaming */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        controls={false}
+        webkit-playsinline="true"
+        className={isStreaming ? "w-full" : "hidden"}
+        style={{
+          transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+          minHeight: '300px',
+          maxHeight: '400px',
+          backgroundColor: '#000',
+          width: '100%',
+          display: isStreaming ? 'block' : 'none',
+          objectFit: 'cover'
+        }}
+        onLoadedMetadata={(e) => {
+          console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
+          setDebugInfo(`Video: ${e.target.videoWidth}x${e.target.videoHeight}`)
+        }}
+        onPlay={() => {
+          console.log('Video started playing')
+          setDebugInfo('Video is playing!')
+        }}
+        onError={(e) => {
+          console.error('Video error:', e)
+          setDebugInfo(`Video error: ${e.type}`)
+        }}
+        onCanPlay={() => {
+          console.log('Video can play')
+          setDebugInfo('Video ready!')
+        }}
+      />
+      
       {!isStreaming ? (
         <div className="py-8">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -285,6 +332,16 @@ const CameraCapture = ({ onImageCaptured }) => {
               Debug: {debugInfo}
             </div>
           )}
+          
+          {/* Visible Debug Panel */}
+          <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-700 border">
+            <div className="font-semibold mb-2">🔍 Debug Info:</div>
+            <div>Component Mounted: {isMounted ? '✅' : '❌'}</div>
+            <div>Is Streaming: {isStreaming ? '✅' : '❌'}</div>
+            <div>Video Ref Exists: {videoRef.current ? '✅' : '❌'}</div>
+            <div>DOM Video Elements: {typeof document !== 'undefined' ? document.querySelectorAll('video').length : 'N/A'}</div>
+            <div>Error State: {error ? '❌ ' + error : '✅ No Error'}</div>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
@@ -295,49 +352,17 @@ const CameraCapture = ({ onImageCaptured }) => {
             </div>
           )}
           
-          {/* Video Preview */}
+          {/* Video Preview Container */}
           <div className="relative bg-black rounded-lg overflow-hidden border-2 border-green-500">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              controls={false}
-              webkit-playsinline="true"
-              className="w-full"
-              style={{
-                transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
-                minHeight: '300px',
-                maxHeight: '400px',
-                backgroundColor: '#000',
-                width: '100%',
-                display: 'block',
-                objectFit: 'cover'
-              }}
-              onLoadedMetadata={(e) => {
-                console.log('Video metadata loaded:', e.target.videoWidth, 'x', e.target.videoHeight)
-                setDebugInfo(`Video: ${e.target.videoWidth}x${e.target.videoHeight}`)
-              }}
-              onPlay={() => {
-                console.log('Video started playing')
-                setDebugInfo('Video is playing!')
-              }}
-              onError={(e) => {
-                console.error('Video error:', e)
-                setDebugInfo(`Video error: ${e.type}`)
-              }}
-              onCanPlay={() => {
-                console.log('Video can play')
-                setDebugInfo('Video ready!')
-              }}
-            />
-            
-            {/* Camera overlay guide */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="border-2 border-white border-dashed rounded-lg w-64 h-48 flex items-center justify-center">
-                <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-                  Center watermelon here
-                </span>
+            {/* Video is rendered above but positioned here visually */}
+            <div className="w-full" style={{ minHeight: '300px', maxHeight: '400px' }}>
+              {/* Camera overlay guide */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div className="border-2 border-white border-dashed rounded-lg w-64 h-48 flex items-center justify-center">
+                  <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                    Center watermelon here
+                  </span>
+                </div>
               </div>
             </div>
           </div>
