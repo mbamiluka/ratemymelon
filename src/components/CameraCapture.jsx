@@ -242,9 +242,9 @@ const CameraCapture = ({ onImageCaptured }) => {
           display: isStreaming ? 'block' : 'none',
           objectFit: 'cover',
           width: '100%',
-          height: '250px',
+          height: '200px',
           maxWidth: '100%',
-          maxHeight: '250px',
+          maxHeight: '200px',
           position: 'absolute',
           top: 0,
           left: 0
@@ -305,20 +305,8 @@ const CameraCapture = ({ onImageCaptured }) => {
         </div>
       ) : (
         <div>
-          {/* Debug Info */}
-          {debugInfo && (
-            <div className="p-2 bg-green-100 rounded text-xs text-green-600 mb-2">
-              Debug: {debugInfo}
-            </div>
-          )}
-          
-          {/* Temporary Mobile Debug Info */}
-          <div className="p-2 bg-yellow-50 rounded text-xs text-gray-600 mb-2 border">
-            Screen: {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}
-          </div>
-          
-          {/* Video Preview Container - Very small for mobile */}
-          <div className="relative bg-black rounded border w-full" style={{ height: '250px', overflow: 'hidden', maxWidth: '100%' }}>
+          {/* Video Preview Container - Optimized for mobile card */}
+          <div className="relative bg-black rounded border w-full" style={{ height: '200px', overflow: 'hidden', maxWidth: '100%' }}>
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
@@ -351,17 +339,18 @@ const CameraCapture = ({ onImageCaptured }) => {
 
           {/* Hidden canvas for image capture */}
           <canvas ref={canvasRef} className="hidden" />
+          
+          {/* Debug Info - Compact */}
+          {debugInfo && (
+            <div className="mt-2 p-1 bg-gray-100 rounded text-xs text-gray-500 text-center">
+              {debugInfo}
+            </div>
+          )}
         </div>
       )}
       
-      <div className="mt-4 text-sm text-gray-500">
-        <p>📱 Camera Tips:</p>
-        <ul className="list-disc list-inside mt-2 space-y-1">
-          <li>Hold phone steady</li>
-          <li>Ensure good lighting</li>
-          <li>Frame the entire watermelon</li>
-          <li>Avoid glare and shadows</li>
-        </ul>
+      <div className="mt-3 text-xs text-gray-400 text-center">
+        <p>💡 Hold steady • Good lighting • Frame entire watermelon</p>
       </div>
     </div>
   )
