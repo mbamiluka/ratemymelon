@@ -242,9 +242,9 @@ const CameraCapture = ({ onImageCaptured }) => {
           display: isStreaming ? 'block' : 'none',
           objectFit: 'cover',
           width: '100%',
-          height: '150px',
+          height: '250px',
           maxWidth: '100%',
-          maxHeight: '150px',
+          maxHeight: '250px',
           position: 'absolute',
           top: 0,
           left: 0
@@ -318,7 +318,7 @@ const CameraCapture = ({ onImageCaptured }) => {
           </div>
           
           {/* Video Preview Container - Very small for mobile */}
-          <div className="relative bg-black rounded border w-full" style={{ height: '150px', overflow: 'hidden', maxWidth: '100%' }}>
+          <div className="relative bg-black rounded border w-full" style={{ height: '250px', overflow: 'hidden', maxWidth: '100%' }}>
             {/* Video is rendered above but positioned here visually */}
             <div className="w-full h-full">
               {/* Camera overlay guide */}
